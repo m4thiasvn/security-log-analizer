@@ -36,8 +36,9 @@ def count_failed_logins(login_events):
     return total_failed_count
 
 # Detect suspicious activity based on failed login attempts
-def detect_suspicious_ips(login_events,alert_message,threshold):
+def detect_suspicious_ips(login_events,threshold):
     checked_ips = []
+    suspicious_ips = []
 
     for event in login_events:
 
@@ -54,7 +55,8 @@ def detect_suspicious_ips(login_events,alert_message,threshold):
                     ip_failed_count += 1
 
             if ip_failed_count >= threshold:
-                print(f"\n{alert_message} "f"IP: {ip} | Failed attempts: {ip_failed_count}")
+                suspicious_ips.append((ip, ip_failed_count))
+    return suspicious_ips
 
 
 
@@ -76,6 +78,15 @@ if __name__ == "__main__":
             "| Status:", event["status"]
         )
 
-    print("\nFAILED LOGIN ATTEMPTS:", total_failed_count)
+    print("FAILED LOGIN ATTEMPTS:", total_failed_count)
 
-    detect_suspicious_ips(login_events, alert_message,3)
+    suspicious_ips = detect_suspicious_ips(login_events, 3)
+    for ip, failed_count in suspicious_ips:
+        print("\n" + alert_message)
+        print(f"Suspicious IP: {ip} | Failed Attempts: {failed_count}")
+        
+
+
+
+
+
