@@ -4,7 +4,7 @@ A beginner-friendly cybersecurity project built with Python to analyze login log
 
 ## Description
 
-Security Log Analyzer reads login events from a CSV file, analyzes failed login attempts, identifies suspicious IP addresses, and generates a security report.
+Security Log Analyzer reads login events from a CSV file, analyzes failed login attempts, identifies suspicious IP addresses, and generates security reports.
 
 This project was developed as a practical way to improve Python programming skills while exploring fundamental cybersecurity concepts.
 
@@ -23,6 +23,8 @@ This project was developed as a practical way to improve Python programming skil
 
 - Python 3
 - CSV
+- unittest
+- Coverage
 - Git
 - GitHub
 
@@ -36,6 +38,10 @@ security-log-analizer/
 │   └── security_report.txt
 ├── src/
 │   └── analyzer.py
+├── tests/
+│   ├── __init__.py
+│   └── test_analyzer.py
+├── .gitignore
 └── README.md
 ```
 
@@ -65,12 +71,28 @@ cd security-log-analizer
 python3 src/analyzer.py
 ```
 
+## Running Tests
+
+Run the automated tests:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+To measure code coverage:
+
+```bash
+coverage run -m unittest discover -s tests
+coverage report -m
+```
+
 ## Learning Goals
 
 - Practice Python fundamentals and functions.
 - Work with CSV files and dictionaries.
 - Understand exception handling and file management.
 - Explore basic security log analysis.
+- Write automated unit tests.
 - Practice version control with Git and GitHub.
 
 ## Disclaimer

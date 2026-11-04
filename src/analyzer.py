@@ -1,10 +1,10 @@
 
 # Security Log Analyzer
 
-project_name = "Security Log Analyzer"
-version = 1.0
-is_active = True
-alert_message = "Suspicious activity detected!"
+PROJECT_NAME = "Security Log Analyzer"
+VERSION = 1.0
+IS_ACTIVE = True
+ALERT_MESSAGE = "Suspicious activity detected!"
 
 import csv
 import os
@@ -15,10 +15,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Load login events from CSV
-# open, open the CSV file containing sample logs
-# "r" mode is used for reading the file
-# with, the file is automatically closed after the block of code is executed
-# csv.DictReader, reads the CSV file and returns each row as a dictionary
 def load_logs():
     login_events = []
     try:
@@ -72,7 +68,8 @@ def generate_report(suspicious_ips):
     report_lines = ["Suspicious IP Report:"]
     report_lines.append("Date: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     report_lines.append("\nTotal Suspicious IPs: " + str(len(suspicious_ips)))
-    report_lines.append("Total Failed Attempts: " + str(sum(failed_count for _, failed_count in suspicious_ips))+"\n")
+    total_failed = sum(failed_count for _, failed_count in suspicious_ips)
+    report_lines.append(f"Total Failed Attempts: {total_failed}\n")
     for ip, failed_count in suspicious_ips:
         report_lines.append(f"IP: {ip} | Failed Attempts: {failed_count}")
     return "\n".join(report_lines)
@@ -107,24 +104,22 @@ def validate_logs(login_events):
         if event["status"] not in ["SUCCESS", "FAILED"]:
             print(f"Invalid status found in event: {event}")
             has_errors = True
-    if has_errors:
-        return False
-    return True
+    return not has_errors
 
 # Main execution block
 def main():
-    print("\nProject:", project_name)
-    print("Version:", version)
-    print("Active:", is_active , "\n")
+    print("\nProject:", PROJECT_NAME)
+    print("Version:", VERSION)
+    print("Active:", IS_ACTIVE , "\n")
     login_events = load_logs()
     
     if login_events is None:
         print("Error: Log file not found. Please ensure 'data/sample_logs.csv' exists.")
-        exit()
+        return
     
     if not validate_logs(login_events):
         print("\nLog validation failed. Please check the logs for errors.")
-        exit()
+        return
     
     total_failed_count = count_failed_logins(login_events)
     
@@ -143,7 +138,7 @@ def main():
     suspicious_ips = detect_suspicious_ips(failed_by_ip, FAILED_LOGIN_THRESHOLD)
     
     for ip, failed_count in suspicious_ips:
-        print("\n" + alert_message)
+        print("\n" + ALERT_MESSAGE)
         print(f"Suspicious IP: {ip} | Failed Attempts: {failed_count}")
     
     report = generate_report(suspicious_ips)
