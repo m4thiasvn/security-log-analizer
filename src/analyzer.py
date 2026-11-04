@@ -4,28 +4,34 @@
 project_name = "Security Log Analyzer"
 version = 1.0
 is_active = True
+alert_message = "Suspicious activity detected!"
 
 import csv
 import os
 from datetime import datetime
 
-alert_message = "Suspicious activity detected!"
 FAILED_LOGIN_THRESHOLD = 3
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # Load login events from CSV
-
 # open, open the CSV file containing sample logs
 # "r" mode is used for reading the file
 # with, the file is automatically closed after the block of code is executed
 # csv.DictReader, reads the CSV file and returns each row as a dictionary
 def load_logs():
     login_events = []
-
-    with open("data/sample_logs.csv", "r", newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-
-        for event in reader:
-            login_events.append(event)
+    try:
+        log_file_path = os.path.join(BASE_DIR, "data", "sample_logs.csv")
+        with open(log_file_path, "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for event in reader:
+                login_events.append(event)
+    except FileNotFoundError:
+        return None
+    except Exception as e:
+        print(f"Error reading logs: {e}")
+        return None
 
     return login_events
 
@@ -73,17 +79,52 @@ def generate_report(suspicious_ips):
 
 # Save the report to a file
 def save_report(report):
-    report_file_path = "reports/security_report.txt"
-    with open(report_file_path, "w", encoding="utf-8") as file:
-        file.write(report)
-    print(f"\nReport saved to {report_file_path}")
+    try:
+        os.makedirs(os.path.join(BASE_DIR, "reports"), exist_ok=True)
+        report_file_path = os.path.join(BASE_DIR, "reports", "security_report.txt")
+        with open(report_file_path, "w", encoding="utf-8") as file:
+            file.write(report)
+        print(f"\nReport saved to {report_file_path}")
+    except FileNotFoundError:
+        print("Error: Report directory not found. Please ensure 'reports/' directory exists.")
+    except Exception as e:
+        print(f"Error saving report: {e}")
+
+# Validate the login events to ensure they have the correct structure and values
+def validate_logs(login_events):
+    if not login_events:
+        print("No login events found.")
+        return False
+    has_errors = False
+    for event in login_events:
+        if "ip" not in event or "username" not in event or "status" not in event:
+            print(f"Invalid log entry found: {event}")
+            has_errors = True  
+            continue
+        if not event["ip"].strip() or not event["username"].strip():
+            has_errors = True
+            print(f"Invalid log entry found: {event}")      
+        if event["status"] not in ["SUCCESS", "FAILED"]:
+            print(f"Invalid status found in event: {event}")
+            has_errors = True
+    if has_errors:
+        return False
+    return True
 
 # Main execution block
 if __name__ == "__main__":
-    print("Project:", project_name)
+    print("\nProject:", project_name)
     print("Version:", version)
-    print("Active:", is_active)
+    print("Active:", is_active , "\n")
     login_events = load_logs()
+
+    if login_events is None:
+        print("Error: Log file not found. Please ensure 'data/sample_logs.csv' exists.")
+        exit()
+
+    if not validate_logs(login_events):
+        print("\nLog validation failed. Please check the logs for errors.")
+        exit()
 
     total_failed_count = count_failed_logins(login_events)
 
@@ -107,8 +148,11 @@ if __name__ == "__main__":
 
     report = generate_report(suspicious_ips)
     save_report(report) 
+
     if not suspicious_ips:
         print("\nNo suspicious IPs detected.")
     else:
         print("\nReport generated successfully.")
+
+    
 
