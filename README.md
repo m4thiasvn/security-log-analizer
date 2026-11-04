@@ -56,7 +56,7 @@ Default threshold: `3` failed login attempts.
 1. Clone this repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/m4thiasvn/security-log-analizer.git
 ```
 
 2. Navigate to the project directory:
