@@ -112,47 +112,50 @@ def validate_logs(login_events):
     return True
 
 # Main execution block
-if __name__ == "__main__":
+def main():
     print("\nProject:", project_name)
     print("Version:", version)
     print("Active:", is_active , "\n")
     login_events = load_logs()
-
+    
     if login_events is None:
         print("Error: Log file not found. Please ensure 'data/sample_logs.csv' exists.")
         exit()
-
+    
     if not validate_logs(login_events):
         print("\nLog validation failed. Please check the logs for errors.")
         exit()
-
+    
     total_failed_count = count_failed_logins(login_events)
-
+    
     print("\nLOGIN EVENTS:")
-
+    
     for event in login_events:
         print(
             "IP:", event["ip"],
             "| User:", event["username"],
             "| Status:", event["status"]
         )
-
+    
     print("FAILED LOGIN ATTEMPTS:", total_failed_count)
-
+    
     failed_by_ip = count_failed_by_ip(login_events)
     suspicious_ips = detect_suspicious_ips(failed_by_ip, FAILED_LOGIN_THRESHOLD)
-
+    
     for ip, failed_count in suspicious_ips:
         print("\n" + alert_message)
         print(f"Suspicious IP: {ip} | Failed Attempts: {failed_count}")
-
+    
     report = generate_report(suspicious_ips)
     save_report(report) 
-
+    
     if not suspicious_ips:
         print("\nNo suspicious IPs detected.")
     else:
         print("\nReport generated successfully.")
+        
+if __name__ == "__main__":
+    main()        
 
     
 
