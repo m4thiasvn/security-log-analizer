@@ -8,6 +8,7 @@ alert_message = "Suspicious activity detected!"
 FAILED_LOGIN_THRESHOLD = 3
 
 import csv
+import os
 
 # Load login events from CSV
 
@@ -56,6 +57,20 @@ def detect_suspicious_ips(failed_by_ip, threshold):
 
     return suspicious_ips
 
+# Generate a report of suspicious IPs
+def generate_report(suspicious_ips):
+    report_lines = ["Suspicious IP Report:"]
+    for ip, failed_count in suspicious_ips:
+        report_lines.append(f"IP: {ip} | Failed Attempts: {failed_count}")
+    return "\n".join(report_lines)
+
+# Save the report to a file
+def save_report(report):
+    report_file_path = "reports/security_report.txt"
+    with open(report_file_path, "w", encoding="utf-8") as file:
+        file.write(report)
+    print(f"Report saved to {report_file_path}")
+
 # Main execution block
 if __name__ == "__main__":
     print("Project:", project_name)
@@ -83,5 +98,6 @@ if __name__ == "__main__":
         print("\n" + alert_message)
         print(f"Suspicious IP: {ip} | Failed Attempts: {failed_count}")
 
-
+    report = generate_report(suspicious_ips)
+    save_report(report) 
 
