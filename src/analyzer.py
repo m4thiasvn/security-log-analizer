@@ -4,11 +4,13 @@
 project_name = "Security Log Analyzer"
 version = 1.0
 is_active = True
-alert_message = "Suspicious activity detected!"
-FAILED_LOGIN_THRESHOLD = 3
 
 import csv
 import os
+from datetime import datetime
+
+alert_message = "Suspicious activity detected!"
+FAILED_LOGIN_THRESHOLD = 3
 
 # Load login events from CSV
 
@@ -59,7 +61,12 @@ def detect_suspicious_ips(failed_by_ip, threshold):
 
 # Generate a report of suspicious IPs
 def generate_report(suspicious_ips):
+    if not suspicious_ips:
+        return "No suspicious IPs detected."
     report_lines = ["Suspicious IP Report:"]
+    report_lines.append("Date: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    report_lines.append("\nTotal Suspicious IPs: " + str(len(suspicious_ips)))
+    report_lines.append("Total Failed Attempts: " + str(sum(failed_count for _, failed_count in suspicious_ips))+"\n")
     for ip, failed_count in suspicious_ips:
         report_lines.append(f"IP: {ip} | Failed Attempts: {failed_count}")
     return "\n".join(report_lines)
@@ -69,7 +76,7 @@ def save_report(report):
     report_file_path = "reports/security_report.txt"
     with open(report_file_path, "w", encoding="utf-8") as file:
         file.write(report)
-    print(f"Report saved to {report_file_path}")
+    print(f"\nReport saved to {report_file_path}")
 
 # Main execution block
 if __name__ == "__main__":
@@ -100,4 +107,8 @@ if __name__ == "__main__":
 
     report = generate_report(suspicious_ips)
     save_report(report) 
+    if not suspicious_ips:
+        print("\nNo suspicious IPs detected.")
+    else:
+        print("\nReport generated successfully.")
 
