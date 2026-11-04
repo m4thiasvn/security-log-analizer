@@ -5,6 +5,7 @@ project_name = "Security Log Analyzer"
 version = 1.0
 is_active = True
 alert_message = "Suspicious activity detected!"
+FAILED_LOGIN_THRESHOLD = 3
 
 import csv
 
@@ -35,30 +36,25 @@ def count_failed_logins(login_events):
 
     return total_failed_count
 
-# Detect suspicious activity based on failed login attempts
-def detect_suspicious_ips(login_events,threshold):
-    checked_ips = []
-    suspicious_ips = []
+# Count failed login attempts by IP address
+def count_failed_by_ip(login_events):
+    failed_by_ip = {}
 
     for event in login_events:
+        if event["status"] == "FAILED":
+            ip = event["ip"]
+            failed_by_ip[ip] = failed_by_ip.get(ip, 0) + 1
+    return failed_by_ip
 
-        ip = event["ip"]
+# Detect suspicious IPs based on a threshold of failed login attempts
+def detect_suspicious_ips(failed_by_ip, threshold):
+    suspicious_ips = []
 
-        if ip not in checked_ips:
+    for ip, failed_count in failed_by_ip.items():
+        if failed_count >= threshold:
+            suspicious_ips.append((ip, failed_count))
 
-            checked_ips.append(ip)
-
-            ip_failed_count = 0
-
-            for login in login_events:
-                if login["ip"] == ip and login["status"] == "FAILED":
-                    ip_failed_count += 1
-
-            if ip_failed_count >= threshold:
-                suspicious_ips.append((ip, ip_failed_count))
     return suspicious_ips
-
-
 
 # Main execution block
 if __name__ == "__main__":
@@ -80,13 +76,12 @@ if __name__ == "__main__":
 
     print("FAILED LOGIN ATTEMPTS:", total_failed_count)
 
-    suspicious_ips = detect_suspicious_ips(login_events, 3)
+    failed_by_ip = count_failed_by_ip(login_events)
+    suspicious_ips = detect_suspicious_ips(failed_by_ip, FAILED_LOGIN_THRESHOLD)
+
     for ip, failed_count in suspicious_ips:
         print("\n" + alert_message)
         print(f"Suspicious IP: {ip} | Failed Attempts: {failed_count}")
-        
-
-
 
 
 
